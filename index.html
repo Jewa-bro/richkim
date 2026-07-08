@@ -53,22 +53,27 @@
 
   .dash-body{flex:1;display:flex;flex-direction:column;padding:0 20px 0;min-height:0;}
 
-  /* 히어로 v2 — 좌: 숫자, 우: 원본 스티커(136×141, 스케일·크롭 금지) */
-  .hero{height:172px;flex:0 0 auto;display:flex;flex-direction:row;align-items:center;gap:12px;padding-top:8px;}
-  .hero-l{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px;overflow:hidden;}
+  /* 히어로 v3 — [스테퍼 h32][main: 좌 숫자 / 우 스티커 136×141] */
+  .hero{height:172px;flex:0 0 auto;display:flex;flex-direction:column;padding-top:8px;}
+  .stepper{height:32px;flex:0 0 auto;display:flex;align-items:center;gap:2px;margin-left:-8px;}
+  .stepper.all{margin-left:0;}
+  .step-arrow{width:40px;height:32px;border:0;background:transparent;color:var(--text-strong);cursor:pointer;
+    display:flex;align-items:center;justify-content:center;border-radius:8px;padding:0;}
+  .stepper.all .step-arrow{display:none;}
+  .step-arrow:active{background:var(--divider);}
+  .step-arrow:disabled{color:var(--divider);cursor:not-allowed;}
+  /* 라벨 탭 = 기록 내역 열기. caret-down으로 화살표와 구분되는 affordance */
+  .step-label{border:0;background:transparent;display:inline-flex;align-items:center;gap:4px;
+    font-size:14px;line-height:20px;font-weight:600;color:var(--text-strong);
+    cursor:pointer;font-family:inherit;padding:4px 8px;border-radius:8px;}
+  .step-label .step-caret{color:var(--text-sub);flex:0 0 auto;margin-top:1px;}
+  .step-label:active{background:var(--divider);}
+  .hero-main{flex:1;min-height:0;display:flex;flex-direction:row;align-items:center;gap:12px;}
+  .hero-l{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:6px;overflow:hidden;}
   .hero-sticker{flex:0 0 auto;display:block;}
   .hero .cap{font-size:12px;line-height:16px;font-weight:500;color:var(--text-sub);}
   .hero .total{font-size:48px;line-height:56px;font-weight:800;letter-spacing:-.03em;white-space:nowrap;}
   .hero .total.compact{font-size:40px;line-height:48px;}
-  .hero .subrow{display:flex;align-items:center;gap:8px;margin-top:4px;}
-  .badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:8px;font-size:12px;line-height:16px;font-weight:600;}
-  .badge.p{background:color-mix(in srgb,var(--profit) 10%,transparent);color:var(--profit);}
-  .badge.l{background:color-mix(in srgb,var(--loss) 10%,transparent);color:var(--loss);}
-  .badge.z{background:var(--divider);color:var(--text-sub);}
-  .hero .cnt{font-size:12px;line-height:16px;color:var(--text-sub);}
-  .cnt-btn{display:inline-flex;align-items:center;gap:2px;font-size:12px;line-height:16px;font-weight:500;
-    color:var(--text-sub);background:transparent;border:0;cursor:pointer;font-family:inherit;padding:2px 4px;border-radius:6px;}
-  .cnt-btn:active{background:var(--divider);}
 
   .chart-card{flex:1;min-height:340px;margin-top:12px;background:var(--surface);border-radius:20px;box-shadow:var(--card-shadow);
     padding:16px 16px 10px;display:flex;flex-direction:column;position:relative;}
@@ -242,20 +247,38 @@
   .hist-clear{display:block;margin:24px auto 8px;background:transparent;border:0;color:var(--text-sub);
     font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;padding:8px 12px;border-radius:8px;}
   .hist-clear:active{background:var(--divider);}
-  .hist-body{flex:1;overflow-y:auto;padding:0 20px calc(28px + env(safe-area-inset-bottom));min-height:0;-webkit-overflow-scrolling:touch;}
-  .hist-group{font-size:12px;line-height:16px;font-weight:600;color:var(--text-sub);margin:18px 0 4px;}
-  .hist-item{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:56px;
-    padding:8px 0;background:transparent;border:0;border-bottom:1px solid var(--divider);cursor:pointer;
-    font-family:inherit;text-align:left;}
+  /* 스크롤 컨테이너 = 흰 카드 한 장, 좌우 마진 16, radius 20, card shadow. 스크롤은 카드 내부에서만 */
+  .hist-body{flex:1;overflow-y:auto;min-height:0;margin:4px 16px calc(16px + env(safe-area-inset-bottom));
+    background:var(--surface);border-radius:20px;box-shadow:var(--card-shadow);-webkit-overflow-scrolling:touch;}
+  /* 날짜 그룹 헤더: 밴드 제거, 불투명 surface + sticky */
+  .hist-group{position:sticky;top:0;z-index:2;background:var(--surface);
+    font-size:12px;line-height:16px;font-weight:600;color:var(--text-sub);text-align:left;padding:20px 20px 8px;}
+  .hist-group:first-child{border-radius:20px 20px 0 0;}
+  /* 스와이프 행: 뒤 빨강 삭제 영역 + 앞 불투명 흰 행(divider는 앞 행에 붙어 함께 이동) */
+  .hist-row{position:relative;overflow:hidden;}
+  .hist-del{position:absolute;top:0;right:0;bottom:0;width:88px;background:var(--profit);
+    display:flex;align-items:center;justify-content:center;gap:4px;color:#fff;font-size:14px;font-weight:700;}
+  .hist-del-act{width:100%;height:100%;background:transparent;border:0;color:#fff;font-size:14px;font-weight:700;
+    cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:4px;}
+  .hist-item{position:relative;width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;
+    height:64px;padding:12px 20px;background:var(--surface);border:0;cursor:pointer;font-family:inherit;text-align:left;
+    box-shadow:inset 0 1px 0 var(--divider);
+    transform:translateX(0);transition:transform .2s var(--ease);touch-action:pan-y;will-change:transform;}
+  /* 행 사이에만 divider(좌 인셋 20). 첫 행/헤더 바로 아래엔 없음 */
+  .hist-group + .hist-row .hist-item{box-shadow:none;}
+  .hist-item::before{content:"";position:absolute;left:20px;right:0;top:0;height:1px;background:var(--divider);}
+  .hist-group + .hist-row .hist-item::before{display:none;}
+  .hist-item.dragging{transition:none;}
   .hist-item:active{background:var(--divider);}
   .hist-l{display:flex;flex-direction:column;gap:2px;min-width:0;}
-  .hist-stock{font-size:16px;line-height:24px;font-weight:500;color:var(--text-strong);display:flex;align-items:center;gap:6px;}
+  .hist-stock{font-size:16px;line-height:22px;font-weight:500;color:var(--text-strong);display:flex;align-items:center;gap:6px;}
   .hist-meta{font-size:12px;line-height:16px;color:var(--text-sub);}
   .mini-badge{display:inline-flex;padding:1px 6px;border-radius:6px;font-size:11px;line-height:15px;font-weight:600;
     background:var(--accent-weak);color:var(--accent);flex:0 0 auto;}
   .hist-net{font-size:16px;font-weight:700;flex:0 0 auto;}
   .hist-net.p{color:var(--profit);} .hist-net.l{color:var(--loss);} .hist-net.z{color:var(--text-sub);}
   .hist-empty{text-align:center;color:var(--text-sub);font-size:14px;padding:48px 0;}
+  .hist-clear-wrap{padding:8px 0 20px;}
 
   /* delete confirm */
   .confirm{position:absolute;inset:0;background:rgba(15,17,21,.4);z-index:45;display:none;
@@ -321,31 +344,39 @@
     <section class="screen" id="dashboard" aria-label="대시보드">
       <div class="hdr">
         <span></span>
-        <div class="seg-period" role="group" aria-label="기간">
-          <button data-period="month" aria-pressed="true">이번 달</button>
-          <button data-period="year" aria-pressed="false">올해</button>
-          <button data-period="all" aria-pressed="false">전체</button>
+        <div class="seg-period" id="granTabs" role="group" aria-label="기간 단위">
+          <button data-g="month" aria-pressed="true">월</button>
+          <button data-g="year" aria-pressed="false">년</button>
+          <button data-g="all" aria-pressed="false">전체</button>
         </div>
       </div>
 
       <div class="dash-body">
         <div class="hero">
-          <div class="hero-l">
-            <div class="cap">누적 실현손익</div>
-            <div class="total num" id="heroTotal">0원</div>
-            <div class="subrow">
-              <span class="badge p" id="heroBadge">이번 달 +0</span>
-              <button class="cnt-btn num" id="heroCount" aria-label="기록 내역 보기"><span id="heroCountTxt">· 0건</span>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
-              </button>
-            </div>
+          <div class="stepper" id="stepper">
+            <button class="step-arrow" id="stepPrev" aria-label="이전 기간">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
+            </button>
+            <button class="step-label num" id="stepLabel" aria-label="기록 내역 열기">
+              <span id="stepLabelTxt">2026년 7월</span>
+              <svg class="step-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+            <button class="step-arrow" id="stepNext" aria-label="다음 기간">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+            </button>
           </div>
-          <img class="hero-sticker" id="heroSticker" width="136" height="141" alt="놀고 먹게 해듀세요 — 마스코트 스티커" />
+          <div class="hero-main">
+            <div class="hero-l">
+              <div class="cap">누적 실현손익</div>
+              <div class="total num" id="heroTotal">0원</div>
+            </div>
+            <img class="hero-sticker" id="heroSticker" width="136" height="141" alt="놀고 먹게 해듀세요 — 마스코트 스티커" />
+          </div>
         </div>
 
         <div class="chart-card">
           <div class="chart-head" id="chartHead">
-            <div class="ch-sum" id="chSummary">최고 +0 · 최저 +0</div>
+            <!-- 평상시 빈 상태(최소 높이 유지) · 스크럽 시 날짜/누적값 표시 -->
             <div class="ch-date num" id="chDate" style="display:none"></div>
             <div class="ch-val num" id="chVal" style="display:none"></div>
           </div>
@@ -406,7 +437,7 @@
             <div class="seg-type" id="segType" data-idx="0" role="group" aria-label="유형">
               <span class="ind"></span>
               <button data-type="일반" aria-pressed="true">일반</button>
-              <button data-type="청약" aria-pressed="false">청약</button>
+              <button data-type="공모" aria-pressed="false">공모</button>
             </div>
           </div>
 
@@ -532,7 +563,7 @@
   // ---------- seed data ----------
   // realPnl = pnl - (type==='청약' ? fee : 0)
   var entries = [];
-  function real(e){ return e.pnl - (e.type==="청약"? e.fee : 0); }
+  function real(e){ return e.pnl - (e.type==="공모"? e.fee : 0); }
   var _id=0; function genId(){ return ++_id; }
   entries.forEach(function(e){ e.id=genId(); e.createdAt=new Date().toISOString(); }); // 향후 클라우드 동기화 대비
 
@@ -542,21 +573,35 @@
   function parseD(s){ return new Date(s+"T00:00:00"); }
   function monthKey(s){ return s.slice(0,7); }
 
-  var state = { period:"month" };
+  // ---------- period store: {granularity, anchor} — 수정/삭제 액션과 분리된 탐색 상태 ----------
+  var period = { granularity:"month", anchor:new Date(TODAY.getFullYear(),TODAY.getMonth(),1) };
 
-  // ---------- period filter ----------
-  function filtered(){
-    if(state.period==="all") return entries.slice();
-    if(state.period==="year") return entries.filter(function(e){return e.d.slice(0,4)===TODAY_STR.slice(0,4);});
-    return entries.filter(function(e){return monthKey(e.d)===monthKey(TODAY_STR);});
+  function isoDate(dt){ return dt.getFullYear()+"-"+("0"+(dt.getMonth()+1)).slice(-2)+"-"+("0"+dt.getDate()).slice(-2); }
+  function startOfMonth(dt){ return new Date(dt.getFullYear(),dt.getMonth(),1); }
+  function firstTradeDate(){
+    if(!entries.length) return new Date(TODAY.getTime());
+    var m=entries[0].d; for(var i=1;i<entries.length;i++){ if(entries[i].d<m) m=entries[i].d; }
+    return parseD(m);
   }
-
-  // ---------- cumulative points ----------
-  function cumPoints(list){
-    var sorted = list.slice().sort(function(a,b){return parseD(a.d)-parseD(b.d);});
-    var run=0, pts=[];
-    for(var i=0;i<sorted.length;i++){ run+=real(sorted[i]); pts.push({date:sorted[i].d, cum:run, e:sorted[i]}); }
-    return pts;
+  // 선택 기간의 캘린더 윈도우 (진행 중 기간은 오늘까지)
+  function windowRange(){
+    var g=period.granularity, a=period.anchor;
+    if(g==="all"){
+      var s=entries.length? firstTradeDate() : startOfMonth(TODAY);
+      return { start:startOfMonth(s), end:new Date(TODAY.getTime()), label:"전체 기간" };
+    }
+    if(g==="year"){
+      var y=a.getFullYear();
+      var end=(y===TODAY.getFullYear())? new Date(TODAY.getTime()) : new Date(y,11,31);
+      return { start:new Date(y,0,1), end:end, label:y+"년" };
+    }
+    var yy=a.getFullYear(), mm=a.getMonth();
+    var mEnd=(yy===TODAY.getFullYear()&&mm===TODAY.getMonth())? new Date(TODAY.getTime()) : new Date(yy,mm+1,0);
+    return { start:new Date(yy,mm,1), end:mEnd, label:yy+"년 "+(mm+1)+"월" };
+  }
+  function filtered(){
+    var w=windowRange(), s=isoDate(w.start), e=isoDate(w.end);
+    return entries.filter(function(x){ return x.d>=s && x.d<=e; });
   }
 
   // ---------- totals (지표 row 삭제 — 합계·건수만 사용) ----------
@@ -583,113 +628,133 @@
   }
   function colorFor(v){ return v>0? "var(--profit)" : (v<0? "var(--loss)" : "var(--text-sub)"); }
 
-  // ---------- chart ----------
+  // ---------- chart (선택 기간 윈도우 전체, 윈도우 시작 y=0 앵커, step-after) ----------
+  var NS="http://www.w3.org/2000/svg", XL="http://www.w3.org/1999/xlink";
   var chartData=null;
-  function renderChart(list){
+  // x라벨 = 선택 기간 캘린더 전체(미래 눈금 포함), axisStart~axisEnd 도메인 기준
+  function drawXLabels(svg,X,w,axisStart,axisEnd){
+    var g=period.granularity, y0=parseFloat(svg.getAttribute("viewBox").split(" ")[3])-6;
+    var labels=[];
+    if(g==="month"){
+      var yy=w.start.getFullYear(), mm=w.start.getMonth();
+      var lastDay=new Date(yy,mm+1,0).getDate();
+      var seen={};
+      [1,8,15,22,lastDay].forEach(function(dd){ if(dd>=1&&dd<=lastDay&&!seen[dd]){ seen[dd]=1; labels.push({t:new Date(yy,mm,dd).getTime(), txt:String(dd)}); } });
+    } else if(g==="year"){
+      var Y2=w.start.getFullYear();
+      [0,3,6,9].forEach(function(mo){ labels.push({t:new Date(Y2,mo,1).getTime(), txt:(mo+1)+"월"}); });
+    } else {
+      for(var y=w.start.getFullYear();y<=new Date(axisEnd).getFullYear();y++){ labels.push({t:Math.max(axisStart,new Date(y,0,1).getTime()), txt:y+""}); }
+    }
+    labels.forEach(function(l){
+      if(l.t<axisStart||l.t>axisEnd) return;
+      var tx=document.createElementNS(NS,"text");
+      tx.setAttribute("x",X(l.t)); tx.setAttribute("y",y0); tx.setAttribute("text-anchor","middle");
+      tx.setAttribute("fill","var(--text-sub)"); tx.setAttribute("font-size","11");
+      tx.textContent=l.txt; svg.appendChild(tx);
+    });
+  }
+  function renderChart(list, w){
     var svg=$("chartSvg"), wrap=$("chartWrap");
     var W=wrap.clientWidth||300, H=wrap.clientHeight||180;
     svg.setAttribute("viewBox","0 0 "+W+" "+H);
     while(svg.firstChild) svg.removeChild(svg.firstChild);
+    $("xLabels").innerHTML="";
 
-    var pts=cumPoints(list);
-    if(pts.length===0){
+    // 앱 전체 0건 → 대형 스티커 빈 상태 (원본 136×141, 스케일 없음)
+    if(entries.length===0){
       chartData=null;
-      // 빈 상태 — 원본 스티커 그대로 (136×141 원본 크기, 스케일 없음. 텍스트가 이미지에 포함되어 캡션 중복 없음)
-      var NS="http://www.w3.org/2000/svg", XL="http://www.w3.org/1999/xlink";
-      var mW=136, mH=141;
-      var mx=(W-mW)/2, my=(H-mH)/2-14;
-      if(my<4) my=4;
+      var mW=136,mH=141,mx=(W-mW)/2,my=(H-mH)/2-14; if(my<4)my=4;
       var img=document.createElementNS(NS,"image");
       img.setAttribute("href",MASCOT_URI); img.setAttributeNS(XL,"xlink:href",MASCOT_URI);
-      img.setAttribute("x",mx); img.setAttribute("y",my);
-      img.setAttribute("width",mW); img.setAttribute("height",mH);
+      img.setAttribute("x",mx); img.setAttribute("y",my); img.setAttribute("width",mW); img.setAttribute("height",mH);
       img.setAttribute("preserveAspectRatio","xMidYMid meet");
       svg.appendChild(img);
-      var t2=document.createElementNS(NS,"text");
-      t2.setAttribute("x",W/2); t2.setAttribute("y",my+mH+22); t2.setAttribute("text-anchor","middle");
-      t2.setAttribute("fill","var(--text-sub)"); t2.setAttribute("font-size","12");
-      t2.textContent="아직 기록이 없어요 · ₩0";
-      svg.appendChild(t2);
-      $("xLabels").innerHTML="";
+      var tt=document.createElementNS(NS,"text");
+      tt.setAttribute("x",W/2); tt.setAttribute("y",my+mH+22); tt.setAttribute("text-anchor","middle");
+      tt.setAttribute("fill","var(--text-sub)"); tt.setAttribute("font-size","12");
+      tt.textContent="아직 기록이 없어요 · ₩0";
+      svg.appendChild(tt);
       return;
     }
 
-    var padL=6,padR=6,padT=14,padB=8;
-    var minD=parseD(pts[0].date).getTime(), maxD=parseD(pts[pts.length-1].date).getTime();
-    if(maxD===minD) maxD=minD+1;
-    var cums=pts.map(function(p){return p.cum;}); cums.push(0);
-    var maxC=Math.max.apply(null,cums), minC=Math.min.apply(null,cums);
-    if(maxC===minC){maxC+=1;minC-=1;}
+    var padL=8,padR=8,padT=16,padB=22;
+    // x축 도메인 = 선택 기간 캘린더 전체 (미래 눈금 포함). 라인은 오늘까지만 그림.
+    var a=period.anchor, g=period.granularity, axisStart, axisEnd, isCur;
+    if(g==="all"){ axisStart=w.start.getTime(); axisEnd=TODAY.getTime(); isCur=true; }
+    else if(g==="year"){ axisStart=new Date(a.getFullYear(),0,1).getTime(); axisEnd=new Date(a.getFullYear(),11,31).getTime(); isCur=(a.getFullYear()===TODAY.getFullYear()); }
+    else { axisStart=new Date(a.getFullYear(),a.getMonth(),1).getTime(); axisEnd=new Date(a.getFullYear(),a.getMonth()+1,0).getTime(); isCur=(a.getFullYear()===TODAY.getFullYear()&&a.getMonth()===TODAY.getMonth()); }
+    var minD=axisStart, maxD=axisEnd; if(maxD<=minD) maxD=minD+86400000;
+    function X(t){ return padL+(t-minD)/(maxD-minD)*(W-padL-padR); }
+
+    // 누적 꺾은선 점 (첫 거래에서 시작, step 없음)
+    var trades=list.slice().sort(function(a,b){return parseD(a.d)-parseD(b.d);});
+    var cum=0, pts=[], scrubPts=[];
+    trades.forEach(function(tr){ cum+=real(tr); var tv=parseD(tr.d).getTime(); pts.push({t:tv,c:cum}); scrubPts.push({date:tr.d,cum:cum}); });
+    var total=cum; // 누적 마지막 = 히어로 총액
+
+    var cvals=pts.map(function(p){return p.c;}); cvals.push(0);
+    var maxC=Math.max.apply(null,cvals), minC=Math.min.apply(null,cvals);
+    if(maxC===minC){ maxC+=1; minC-=1; }
     var range=maxC-minC;
-
-    function X(dstr){ var d=parseD(dstr).getTime(); return padL+(d-minD)/(maxD-minD)*(W-padL-padR); }
     function Y(c){ return padT+(maxC-c)/range*(H-padT-padB); }
-    var zeroY=Y(0);
+    var zeroY=Y(0), lineColor= total>=0? "var(--profit)":"var(--loss)";
 
-    var final=pts[pts.length-1].cum;
-    var lineColor = final>=0? "var(--profit)":"var(--loss)";
-    var xy=pts.map(function(p){return {x:X(p.date), y:Y(p.cum), p:p};});
-
-    // dedupe same x by keeping last cum (same-day)
-    // build line path
-    var dLine="M "+xy[0].x+" "+xy[0].y;
-    for(var i=1;i<xy.length;i++){ dLine+=" L "+xy[i].x+" "+xy[i].y; }
-
-    // area path to zero baseline
-    var dArea=dLine+" L "+xy[xy.length-1].x+" "+zeroY+" L "+xy[0].x+" "+zeroY+" Z";
-
-    var area=document.createElementNS("http://www.w3.org/2000/svg","path");
-    area.setAttribute("d",dArea); area.setAttribute("fill",lineColor);
-    area.setAttribute("fill-opacity","0.08"); area.setAttribute("stroke","none");
-    svg.appendChild(area);
-
-    // zero dotted line
-    var zl=document.createElementNS("http://www.w3.org/2000/svg","line");
+    // 0 기준 점선 (항상, 전체 축)
+    var zl=document.createElementNS(NS,"line");
     zl.setAttribute("x1",padL);zl.setAttribute("x2",W-padR);zl.setAttribute("y1",zeroY);zl.setAttribute("y2",zeroY);
     zl.setAttribute("stroke","var(--divider)");zl.setAttribute("stroke-width","1");zl.setAttribute("stroke-dasharray","3 3");
     svg.appendChild(zl);
 
-    var line=document.createElementNS("http://www.w3.org/2000/svg","path");
-    line.setAttribute("d",dLine);line.setAttribute("fill","none");line.setAttribute("stroke",lineColor);
-    line.setAttribute("stroke-width","2.5");line.setAttribute("stroke-linejoin","round");line.setAttribute("stroke-linecap","round");
+    // 이 기간 0건 → 텍스트만
+    if(trades.length===0){
+      chartData=null;
+      var t0=document.createElementNS(NS,"text");
+      t0.setAttribute("x",W/2); t0.setAttribute("y",H/2); t0.setAttribute("text-anchor","middle");
+      t0.setAttribute("fill","var(--text-sub)"); t0.setAttribute("font-size","13");
+      t0.textContent="이 기간엔 기록이 없어요";
+      svg.appendChild(t0);
+      drawXLabels(svg,X,w,axisStart,axisEnd);
+      return;
+    }
+
+    // 라인 점: 첫 거래~마지막 거래. 진행 중 기간이면 오늘까지 평평히 연장(미래 구간엔 선 없음).
+    var linePts=pts.slice();
+    var lastT=pts[pts.length-1].t;
+    if(isCur && TODAY.getTime()>lastT){ linePts.push({t:TODAY.getTime(), c:total}); }
+
+    var d="M "+X(linePts[0].t)+" "+Y(linePts[0].c);
+    for(var i=1;i<linePts.length;i++){ d+=" L "+X(linePts[i].t)+" "+Y(linePts[i].c); }
+    var dArea=d+" L "+X(linePts[linePts.length-1].t)+" "+zeroY+" L "+X(linePts[0].t)+" "+zeroY+" Z";
+
+    var area=document.createElementNS(NS,"path");
+    area.setAttribute("d",dArea); area.setAttribute("fill",lineColor); area.setAttribute("fill-opacity","0.08"); area.setAttribute("stroke","none");
+    svg.appendChild(area);
+    var line=document.createElementNS(NS,"path");
+    line.setAttribute("d",d); line.setAttribute("fill","none"); line.setAttribute("stroke",lineColor);
+    line.setAttribute("stroke-width","2.5"); line.setAttribute("stroke-linejoin","round"); line.setAttribute("stroke-linecap","round");
+    line.id="chartLine";
     svg.appendChild(line);
 
-    // last point dot
-    var lastDot=document.createElementNS("http://www.w3.org/2000/svg","circle");
-    lastDot.setAttribute("cx",xy[xy.length-1].x);lastDot.setAttribute("cy",xy[xy.length-1].y);
-    lastDot.setAttribute("r","4.5");lastDot.setAttribute("fill",lineColor);
-    lastDot.setAttribute("class","lastdot");lastDot.id="lastDot";
+    var lastDot=document.createElementNS(NS,"circle");
+    lastDot.setAttribute("cx",X(linePts[linePts.length-1].t)); lastDot.setAttribute("cy",Y(total)); lastDot.setAttribute("r","4.5");
+    lastDot.setAttribute("fill",lineColor); lastDot.setAttribute("class","lastdot"); lastDot.id="lastDot";
     svg.appendChild(lastDot);
 
-    // scrub guideline + dot (hidden)
-    var guide=document.createElementNS("http://www.w3.org/2000/svg","line");
-    guide.setAttribute("y1",padT-6);guide.setAttribute("y2",H-padB+2);
-    guide.setAttribute("stroke","var(--text-sub)");guide.setAttribute("stroke-opacity","0.4");
-    guide.setAttribute("stroke-width","1");guide.setAttribute("visibility","hidden");guide.id="guide";
+    var guide=document.createElementNS(NS,"line");
+    guide.setAttribute("y1",padT-6); guide.setAttribute("y2",H-padB+2);
+    guide.setAttribute("stroke","var(--text-sub)"); guide.setAttribute("stroke-opacity","0.4");
+    guide.setAttribute("stroke-width","1"); guide.setAttribute("visibility","hidden"); guide.id="guide";
     svg.appendChild(guide);
-    var sdot=document.createElementNS("http://www.w3.org/2000/svg","circle");
-    sdot.setAttribute("r","6");sdot.setAttribute("fill",lineColor);sdot.setAttribute("stroke","var(--surface)");
-    sdot.setAttribute("stroke-width","2.5");sdot.setAttribute("visibility","hidden");sdot.id="sdot";
+    var sdot=document.createElementNS(NS,"circle");
+    sdot.setAttribute("r","6"); sdot.setAttribute("fill",lineColor); sdot.setAttribute("stroke","var(--surface)");
+    sdot.setAttribute("stroke-width","2.5"); sdot.setAttribute("visibility","hidden"); sdot.id="sdot";
     svg.appendChild(sdot);
 
-    chartData={pts:pts,xy:xy,W:W,H:H,color:lineColor,final:final,maxC:maxC,minC:minC};
+    var xy=scrubPts.map(function(p){ return {x:X(parseD(p.date).getTime()), y:Y(p.cum), p:p}; });
+    chartData={xy:xy, W:W, H:H};
 
-    // summary
-    $("chSummary").textContent="최고 "+signed(maxC>0?maxC:0)+" · 최저 "+signed(pts.reduce(function(m,p){return Math.min(m,p.cum);},pts[0].cum));
-
-    // x labels
-    var xl=$("xLabels"); xl.innerHTML="";
-    var labelIdx=[];
-    var n=pts.length;
-    labelIdx=[0, Math.floor((n-1)/3), Math.floor((n-1)*2/3), n-1];
-    var seen={};
-    labelIdx.forEach(function(idx){
-      if(seen[idx])return; seen[idx]=1;
-      var dt=parseD(pts[idx].date);
-      var span=document.createElement("span");
-      span.textContent=(dt.getMonth()+1)+"/"+dt.getDate();
-      xl.appendChild(span);
-    });
+    drawXLabels(svg,X,w,axisStart,axisEnd);
   }
 
   // ---------- scrub ----------
@@ -704,7 +769,6 @@
     g.setAttribute("x1",p.x);g.setAttribute("x2",p.x);g.setAttribute("visibility","visible");
     sd.setAttribute("cx",p.x);sd.setAttribute("cy",p.y);sd.setAttribute("visibility","visible");
     var dt=parseD(p.p.date);
-    $("chSummary").style.display="none";
     $("chDate").style.display="block"; $("chVal").style.display="block";
     $("chDate").textContent=(dt.getMonth()+1)+"월 "+dt.getDate()+"일";
     $("chVal").textContent=signed(p.p.cum)+"원";
@@ -714,7 +778,6 @@
     var g=$("guide"), sd=$("sdot");
     if(g)g.setAttribute("visibility","hidden");
     if(sd)sd.setAttribute("visibility","hidden");
-    $("chSummary").style.display="block";
     $("chDate").style.display="none"; $("chVal").style.display="none";
   }
   function bindScrub(){
@@ -764,33 +827,78 @@
       }
     }
   }
+  function updateStepper(w){
+    var st=$("stepper");
+    if(period.granularity==="all"){ st.classList.add("all"); $("stepLabelTxt").textContent="전체 기간"; }
+    else { st.classList.remove("all"); $("stepLabelTxt").textContent=w.label; }
+    $("stepPrev").disabled=!canStepLeft();
+    $("stepNext").disabled=!canStepRight();
+  }
+  function morphChart(list,w){
+    var wrap=$("chartWrap");
+    wrap.style.transition="none"; wrap.style.opacity="0"; wrap.style.transform="translateY(4px)";
+    requestAnimationFrame(function(){
+      renderChart(list,w);
+      wrap.style.transition="opacity .26s var(--ease),transform .26s var(--ease)";
+      requestAnimationFrame(function(){ wrap.style.opacity="1"; wrap.style.transform="translateY(0)"; });
+    });
+  }
   function renderDashboard(animate){
+    var w=windowRange();
     var list=filtered();
     var m=computeMetrics(list);
-    // hero
     fitHeroTotal(m.total);
-    if(animate) countUp($("heroTotal"), m.total);
+    if(animate && !reduce) countUp($("heroTotal"), m.total);
     else { $("heroTotal").textContent=signedWon(m.total); $("heroTotal").style.color=colorFor(m.total); }
-    // month badge label depends on period
-    var monthTotal=computeMetrics(entries.filter(function(e){return monthKey(e.d)===monthKey(TODAY_STR);})).total;
-    var lbl = state.period==="all"?"전체": state.period==="year"?"올해":"이번 달";
-    var b=$("heroBadge");
-    var showVal = state.period==="month"? monthTotal : m.total;
-    b.className="badge "+(showVal>0?"p":showVal<0?"l":"z");
-    b.textContent=lbl+" "+signed(showVal);
-    $("heroCountTxt").textContent="· "+m.cnt+"건";
-    renderChart(list);
+    updateStepper(w);
+    if(animate && !reduce) morphChart(list,w); else renderChart(list,w);
   }
 
-  // period buttons
-  Array.prototype.forEach.call(document.querySelectorAll(".seg-period button"),function(btn){
-    btn.addEventListener("click",function(){
-      document.querySelectorAll(".seg-period button").forEach(function(b){b.setAttribute("aria-pressed","false");});
-      btn.setAttribute("aria-pressed","true");
-      state.period=btn.dataset.period;
-      renderDashboard(true);
-    });
+  // ---------- granularity 탭 + 스테퍼 ----------
+  function clampAnchor(){
+    var a=period.anchor;
+    if(period.granularity==="month"){
+      if(a.getFullYear()>TODAY.getFullYear() || (a.getFullYear()===TODAY.getFullYear()&&a.getMonth()>TODAY.getMonth()))
+        period.anchor=new Date(TODAY.getFullYear(),TODAY.getMonth(),1);
+    } else if(period.granularity==="year"){
+      if(a.getFullYear()>TODAY.getFullYear()) period.anchor=new Date(TODAY.getFullYear(),0,1);
+    }
+  }
+  function canStepRight(){
+    var a=period.anchor, g=period.granularity;
+    if(g==="month") return !(a.getFullYear()===TODAY.getFullYear()&&a.getMonth()===TODAY.getMonth());
+    if(g==="year") return a.getFullYear()<TODAY.getFullYear();
+    return false;
+  }
+  function canStepLeft(){
+    if(!entries.length) return false;
+    var a=period.anchor, g=period.granularity, f=firstTradeDate();
+    if(g==="month") return (a.getFullYear()>f.getFullYear())||(a.getFullYear()===f.getFullYear()&&a.getMonth()>f.getMonth());
+    if(g==="year") return a.getFullYear()>f.getFullYear();
+    return false;
+  }
+  function setGranularity(g){
+    if(g===period.granularity) return;
+    var endD=windowRange().end; // 보던 시점 포함 기간으로 스냅
+    if(g==="month") period.anchor=new Date(endD.getFullYear(),endD.getMonth(),1);
+    else if(g==="year") period.anchor=new Date(endD.getFullYear(),0,1);
+    period.granularity=g; clampAnchor();
+    document.querySelectorAll("#granTabs button").forEach(function(b){ b.setAttribute("aria-pressed", b.dataset.g===g?"true":"false"); });
+    renderDashboard(true);
+  }
+  function stepPeriod(dir){
+    var a=period.anchor;
+    if(period.granularity==="month") period.anchor=new Date(a.getFullYear(),a.getMonth()+dir,1);
+    else if(period.granularity==="year") period.anchor=new Date(a.getFullYear()+dir,0,1);
+    renderDashboard(true);
+  }
+  document.querySelectorAll("#granTabs button").forEach(function(btn){
+    btn.addEventListener("click",function(){ setGranularity(btn.dataset.g); });
   });
+  $("stepPrev").addEventListener("click",function(){ if(canStepLeft()) stepPeriod(-1); });
+  $("stepNext").addEventListener("click",function(){ if(canStepRight()) stepPeriod(1); });
+  // 라벨 탭 = 기록 내역 열기 + 현재 선택 기간 위치로 스크롤 (화살표는 그래프 기간 이동 유지)
+  $("stepLabel").addEventListener("click",openHistoryAtPeriod);
 
   // ================= INPUT SHEET =================
   var brokers=["미래에셋","신한","KB"];
@@ -804,6 +912,7 @@
       se.forEach(function(x){
         if(x.id==null) x.id=genId();
         if(!x.createdAt) x.createdAt=new Date().toISOString();
+        if(x.type==="청약") x.type="공모"; // ver3 마이그레이션: 청약 → 공모
         if(typeof x.id==="number" && x.id>mx) mx=x.id;
         entries.push(x);
       });
@@ -812,11 +921,12 @@
     if(sb && sb.length){ brokers.length=0; sb.forEach(function(x){brokers.push(x);}); }
     if(ss && ss.length!==undefined){ stocks.length=0; ss.forEach(function(x){stocks.push(x);}); }
     // v2 마이그레이션: 구버전 프리셋(삼성·키움)을 저장 목록에서 1회 제거 (직접 추가분은 이후 유지)
-    if(lsGet("rk_ver")!==2){
+    if(lsGet("rk_ver")<2){
       var i=brokers.indexOf("삼성"); if(i>-1) brokers.splice(i,1);
       i=brokers.indexOf("키움"); if(i>-1) brokers.splice(i,1);
-      lsSet("rk_ver",2); persist();
     }
+    // ver3: 청약→공모 반영분 저장 + 버전 갱신
+    if((lsGet("rk_ver")||1)<3){ lsSet("rk_ver",3); persist(); }
     if(se==null){ persist(); } // 최초 로드: 시드도 곧바로 저장
   })();
 
@@ -825,6 +935,7 @@
     pnl:{digits:"", sign:1}, fee:{digits:"2000"}
   };
   var activeField=null; // 'pnl' | 'fee'
+  var editingId=null;   // null=신규 기록, 값 있으면 해당 레코드 수정
 
   var DAYS=["일","월","화","수","목","금","토"];
   function dateLabel(iso){
@@ -924,7 +1035,7 @@
 
   function pnlNum(){ var v=parseInt(draft.pnl.digits||"0",10); return v*draft.pnl.sign; }
   function feeNum(){ return parseInt(draft.fee.digits||"0",10); }
-  function netNum(){ return pnlNum() - (draft.type==="청약"? feeNum():0); }
+  function netNum(){ return pnlNum() - (draft.type==="공모"? feeNum():0); }
 
   function updateFieldValues(){
     // 값+"원" 밀착 표기, 미입력은 --text-sub 플레이스홀더
@@ -948,7 +1059,7 @@
     // fee note (청약일 때만 보이는 캡션 — 큰 프리뷰 없음, 내부 계산은 net 유지)
     var noteTxt = "수수료 제외 "+signedWon(netNum())+"으로 기록돼요";
     $("feeNote").textContent=noteTxt;
-    $("pfNote").textContent = draft.type==="청약"? noteTxt : "";
+    $("pfNote").textContent = draft.type==="공모"? noteTxt : "";
     // enable save
     var ok = draft.stock.trim()!=="" && draft.pnl.digits!=="";
     $("saveBtn").disabled=!ok;
@@ -994,7 +1105,7 @@
     var scr=$("inputScreen");
     if(scr.classList.contains("cal-open")) setSheetTitle("날짜 변경");
     else if(scr.classList.contains("pad-open")) setSheetTitle(activeField==="fee"?"청약수수료 입력":"손익 입력");
-    else setSheetTitle("손익 기록하기");
+    else setSheetTitle(editingId!=null?"손익 수정":"손익 기록하기");
   }
 
   function openPad(field){
@@ -1027,7 +1138,7 @@
       btn.setAttribute("aria-pressed","true");
       segType.dataset.idx=i;
       draft.type=btn.dataset.type;
-      if(draft.type==="청약"){ $("feeField").classList.add("show"); }
+      if(draft.type==="공모"){ $("feeField").classList.add("show"); }
       else { $("feeField").classList.remove("show"); }
       updatePreview();
     });
@@ -1159,6 +1270,33 @@
     $("sheet").classList.add("show");
     requestAnimationFrame(updateChipFade);
   }
+  function resetDraft(){
+    editingId=null;
+    draft.stock=""; stockInput.value=""; draft.pnl={digits:"",sign:1}; draft.type="일반";
+    draft.date=TODAY_STR; $("dateBtn").textContent=dateLabel(TODAY_STR);
+    segType.dataset.idx=0; segType.querySelectorAll("button").forEach(function(b,i){b.setAttribute("aria-pressed",i===0?"true":"false");});
+    $("feeField").classList.remove("show"); draft.fee={digits:"2000"};
+    $("saveBtn").textContent="기록 완료";
+    updateFieldValues(); updatePreview(); syncSheetTitle();
+  }
+  function openSheetNew(){ resetDraft(); openSheet(); }
+  function openSheetEdit(e){
+    editingId=e.id;
+    draft.date=e.d; draft.broker=e.broker; draft.type=e.type;
+    draft.stock=e.stock; stockInput.value=e.stock;
+    draft.pnl={digits:String(Math.abs(e.pnl)), sign:e.pnl<0?-1:1};
+    draft.fee={digits:(e.fee>0?String(e.fee):"2000")};
+    if(brokers.indexOf(e.broker)<0) brokers.push(e.broker);
+    renderChips(); selectBroker(e.broker);
+    $("dateBtn").textContent=dateLabel(e.d);
+    var idx=(e.type==="공모")?1:0;
+    segType.dataset.idx=idx;
+    segType.querySelectorAll("button").forEach(function(b,i){ b.setAttribute("aria-pressed", i===idx?"true":"false"); });
+    if(e.type==="공모") $("feeField").classList.add("show"); else $("feeField").classList.remove("show");
+    $("saveBtn").textContent="수정 완료";
+    updateFieldValues(); updatePreview();
+    closeHistory(); openSheet(); syncSheetTitle();
+  }
   function closeSheet(){
     closePad();
     closeCal();
@@ -1166,8 +1304,9 @@
     hideAC();
     $("sheet").classList.remove("show");
     $("scrim").classList.remove("show");
+    editingId=null; $("saveBtn").textContent="기록 완료";
   }
-  $("openSheet").addEventListener("click",openSheet);
+  $("openSheet").addEventListener("click",openSheetNew);
   // ✕/← 스코프: 패드·캘린더가 열려 있으면 해당 단계만 닫고 폼으로 복귀 (입력값 유지)
   $("closeSheet").addEventListener("click",function(){
     var scr=$("inputScreen");
@@ -1194,24 +1333,30 @@
 
   $("saveBtn").addEventListener("click",function(){
     if($("saveBtn").disabled) return;
-    var e={ id:genId(), createdAt:new Date().toISOString(), d:draft.date, broker:draft.broker, type:draft.type, stock:draft.stock.trim(),
-            pnl:pnlNum(), fee:draft.type==="청약"?feeNum():0 };
-    entries.push(e);
-    addStockCandidate(e.stock); // new stock -> future dropdown/search
-    persist();
-    vibe([10,30,10]);
-    var r=real(e);
-    // back to dashboard (month period to show new)
-    state.period="month";
-    document.querySelectorAll(".seg-period button").forEach(function(b){b.setAttribute("aria-pressed", b.dataset.period==="month"?"true":"false");});
-    closeSheet();
-    // reset draft
-    draft.stock=""; stockInput.value=""; draft.pnl={digits:"",sign:1}; draft.type="일반";
-    draft.date=TODAY_STR; $("dateBtn").textContent=dateLabel(TODAY_STR);
-    segType.dataset.idx=0; segType.querySelectorAll("button").forEach(function(b,i){b.setAttribute("aria-pressed",i===0?"true":"false");});
-    $("feeField").classList.remove("show"); draft.fee={digits:"2000"};
-    updateFieldValues(); updatePreview();
+    var pnl=pnlNum(), fee=(draft.type==="공모")?feeNum():0, stock=draft.stock.trim();
 
+    if(editingId!=null){
+      // 수정: 해당 레코드 in-place update, 현재 선택 기간 컨텍스트 유지
+      for(var i=0;i<entries.length;i++){ if(entries[i].id===editingId){
+        var e0=entries[i];
+        e0.d=draft.date; e0.broker=draft.broker; e0.type=draft.type; e0.stock=stock;
+        e0.pnl=pnl; e0.fee=fee; e0.updatedAt=new Date().toISOString();
+        break;
+      }}
+      addStockCandidate(stock); persist(); vibe([10,30,10]);
+      closeSheet(); resetDraft(); renderHistory();
+      setTimeout(function(){ renderDashboard(!reduce); showInfoToast("수정했어요"); }, 320);
+      return;
+    }
+
+    // 신규: 오늘이 포함된 월 기간으로 스냅해 바로 보이게
+    var e={ id:genId(), createdAt:new Date().toISOString(), d:draft.date, broker:draft.broker,
+            type:draft.type, stock:stock, pnl:pnl, fee:fee };
+    entries.push(e); addStockCandidate(e.stock); persist(); vibe([10,30,10]);
+    var r=real(e);
+    period.granularity="month"; period.anchor=new Date(TODAY.getFullYear(),TODAY.getMonth(),1);
+    document.querySelectorAll("#granTabs button").forEach(function(b){ b.setAttribute("aria-pressed", b.dataset.g==="month"?"true":"false"); });
+    closeSheet(); resetDraft();
     setTimeout(function(){
       renderDashboard(true);
       showToast(r);
@@ -1243,7 +1388,7 @@
     var header=["일자","증권사","종목","유형","손익","청약수수료","진짜손익"];
     var rows=[header];
     entries.slice().sort(function(a,b){return a.d<b.d?-1:a.d>b.d?1:0;}).forEach(function(e){
-      rows.push([e.d,e.broker,e.stock,e.type,e.pnl,(e.type==="청약"?e.fee:0),real(e)]);
+      rows.push([e.d,e.broker,e.stock,e.type,e.pnl,(e.type==="공모"?e.fee:0),real(e)]);
     });
     var csv=rows.map(function(r){return r.map(csvEscape).join(",");}).join("\r\n");
     var blob=new Blob(["﻿"+csv],{type:"text/csv;charset=utf-8;"}); // UTF-8 BOM으로 엑셀 한글 보존
@@ -1264,11 +1409,12 @@
       var pnl=parseInt(String(c[4]).replace(/[^0-9\-]/g,""),10);
       var fee=c[5]!=null?parseInt(String(c[5]).replace(/[^0-9\-]/g,""),10):0;
       if(!/^\d{4}-\d{2}-\d{2}$/.test(d) || !stock || isNaN(pnl)) continue;
-      if(type!=="청약") type="일반";
+      if(type==="청약") type="공모"; // CSV 하위호환: 구 명칭 매핑
+      if(type!=="공모") type="일반";
       var dup=entries.some(function(e){return e.d===d && e.broker===broker && e.stock===stock && e.pnl===pnl;});
       if(dup) continue; // (일자+증권사+종목+손익) 동일 건 중복 추가 안 함
       entries.push({ id:genId(), createdAt:new Date().toISOString(), d:d, broker:broker, type:type,
-                     stock:stock, pnl:pnl, fee:(type==="청약"?(isNaN(fee)?0:fee):0) });
+                     stock:stock, pnl:pnl, fee:(type==="공모"?(isNaN(fee)?0:fee):0) });
       if(broker && brokers.indexOf(broker)<0) brokers.push(broker);
       addStockCandidate(stock);
       added++;
@@ -1297,7 +1443,16 @@
     var dt=parseD(isoStr);
     return (dt.getMonth()+1)+"월 "+dt.getDate()+"일 "+DAYS[dt.getDay()]+"요일";
   }
+  function deleteEntry(id){
+    for(var i=0;i<entries.length;i++){ if(entries[i].id===id){ entries.splice(i,1); break; } }
+    persist();
+    renderHistory();
+    renderDashboard(false); // 현재 기간 유지 — 0건이면 §2 폴백(자동 점프 없음)
+    vibe(10);
+  }
+  var openSwipeRow=null; // 현재 열린 스와이프 행(하나만)
   function renderHistory(){
+    openSwipeRow=null;
     var body=$("histBody"); body.innerHTML="";
     if(entries.length===0){
       var em=document.createElement("div"); em.className="hist-empty";
@@ -1313,73 +1468,119 @@
       if(e.d!==lastDate){
         lastDate=e.d;
         var g=document.createElement("div"); g.className="hist-group";
+        g.dataset.date=e.d; // 기간 스크롤 타겟용
         g.textContent=groupLabel(e.d);
         body.appendChild(g);
       }
       var net=real(e);
-      var item=document.createElement("button"); item.type="button"; item.className="hist-item";
-      item.setAttribute("aria-label",e.stock+" "+signedWon(net)+" 삭제하려면 선택");
+      var row=document.createElement("div"); row.className="hist-row";
+      var delbg=document.createElement("div"); delbg.className="hist-del";
+      var delBtn=document.createElement("button"); delBtn.type="button"; delBtn.className="hist-del-act";
+      delBtn.setAttribute("aria-label",e.stock+" 삭제");
+      delBtn.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg><span>삭제</span>';
+      delbg.appendChild(delBtn);
 
+      var item=document.createElement("button"); item.type="button"; item.className="hist-item";
+      item.setAttribute("aria-label",e.stock+" "+signedWon(net)+" · 탭하면 수정");
       var l=document.createElement("div"); l.className="hist-l";
       var st=document.createElement("div"); st.className="hist-stock";
       st.appendChild(document.createTextNode(e.stock));
-      if(e.type==="청약"){
-        var mb=document.createElement("span"); mb.className="mini-badge"; mb.textContent="청약";
+      if(e.type==="공모"){
+        var mb=document.createElement("span"); mb.className="mini-badge"; mb.textContent="공모";
         st.appendChild(mb);
       }
       var meta=document.createElement("div"); meta.className="hist-meta";
       meta.textContent=e.broker+" · "+e.type;
       l.appendChild(st); l.appendChild(meta);
-
       var nv=document.createElement("div");
       nv.className="hist-net num "+(net>0?"p":net<0?"l":"z");
       nv.textContent=signedWon(net);
-
       item.appendChild(l); item.appendChild(nv);
-      item.addEventListener("click",function(){
-        confirmMode="delete"; pendingDeleteId=e.id;
-        $("confirmTitle").textContent="이 기록을 지울까요?";
-        $("confirmSub").textContent=groupLabel(e.d)+" · "+e.stock+" · "+signedWon(net);
-        $("confirm").classList.add("show");
+      row.appendChild(delbg); row.appendChild(item);
+      body.appendChild(row);
+
+      // ---- swipe(터치+마우스, pointer) : 왼쪽으로 밀면 삭제 영역, 임계값 넘기면 삭제 ----
+      var OPEN=-88, THRESH=-150;
+      var startX=0, base=0, cur=0, dragging=false, moved=false, opened=false;
+      function setX(x){ item.style.transform="translateX("+x+"px)"; cur=x; }
+      function closeRow(){ opened=false; item.classList.remove("dragging"); setX(0); if(openSwipeRow===api) openSwipeRow=null; }
+      function openRow(){ opened=true; setX(OPEN); openSwipeRow=api; }
+      var api={close:closeRow};
+      item.addEventListener("pointerdown",function(ev){
+        if(openSwipeRow && openSwipeRow!==api){ openSwipeRow.close(); }
+        dragging=true; moved=false; startX=ev.clientX; base=opened?OPEN:0;
+        item.classList.add("dragging");
+        try{ item.setPointerCapture(ev.pointerId); }catch(_){}
       });
-      body.appendChild(item);
+      item.addEventListener("pointermove",function(ev){
+        if(!dragging) return;
+        var dx=ev.clientX-startX;
+        if(Math.abs(dx)>4) moved=true;
+        var nx=Math.max(-170, Math.min(0, base+dx));
+        setX(nx);
+      });
+      function endDrag(ev){
+        if(!dragging) return; dragging=false; item.classList.remove("dragging");
+        if(cur<=THRESH){ deleteEntry(e.id); return; }
+        if(cur < OPEN/2) openRow(); else closeRow();
+      }
+      item.addEventListener("pointerup",endDrag);
+      item.addEventListener("pointercancel",endDrag);
+      item.addEventListener("click",function(ev){
+        if(moved || opened){ ev.preventDefault(); if(opened) closeRow(); return; }
+        openSheetEdit(e); // 탭 → 수정
+      });
+      delBtn.addEventListener("click",function(ev){ ev.stopPropagation(); deleteEntry(e.id); });
     });
     // 전체 삭제(선택) — 확인 후 localStorage 포함 삭제
+    var clrWrap=document.createElement("div"); clrWrap.className="hist-clear-wrap";
     var clr=document.createElement("button"); clr.type="button"; clr.className="hist-clear";
     clr.textContent="전체 삭제";
     clr.addEventListener("click",function(){
-      confirmMode="clear"; pendingDeleteId=null;
+      confirmMode="clear";
       $("confirmTitle").textContent="모든 기록을 지울까요?";
       $("confirmSub").textContent="내보내기로 백업해 두는 걸 추천해요";
       $("confirm").classList.add("show");
     });
-    body.appendChild(clr);
+    clrWrap.appendChild(clr); body.appendChild(clrWrap);
   }
 
-  function openHistory(){ renderHistory(); $("historyScreen").classList.add("show"); }
+  function openHistory(){ renderHistory(); $("historyScreen").classList.add("show"); $("histBody").scrollTop=0; }
   function closeHistory(){ $("historyScreen").classList.remove("show"); }
-  $("heroCount").addEventListener("click",openHistory);
+  // 전체 리스트 로드 후 현재 선택 기간 그룹으로 스크롤 (기간 필터 아님)
+  function scrollHistoryToPeriod(){
+    var body=$("histBody");
+    if(period.granularity==="all"){ body.scrollTop=0; return; }
+    var w=windowRange(), y=w.start.getFullYear(), m=w.start.getMonth();
+    var groups=body.querySelectorAll(".hist-group"), target=null;
+    for(var i=0;i<groups.length;i++){
+      var iso=groups[i].dataset.date; if(!iso) continue;
+      var gy=+iso.slice(0,4), gm=+iso.slice(5,7)-1;
+      if(period.granularity==="month"){ if(gy===y&&gm===m){ target=groups[i]; break; } }
+      else { if(gy===y){ target=groups[i]; break; } } // 년: 해당 연도 첫(최신) 그룹
+    }
+    // 폴백: 해당 기간 기록 없으면 맨 위
+    if(!target){ body.scrollTop=0; return; }
+    var br=body.getBoundingClientRect(), tr=target.getBoundingClientRect();
+    body.scrollTop += (tr.top - br.top);
+  }
+  function openHistoryAtPeriod(){
+    renderHistory(); $("historyScreen").classList.add("show");
+    requestAnimationFrame(function(){ scrollHistoryToPeriod(); });
+  }
   $("histBack").addEventListener("click",closeHistory);
 
-  $("confirmNo").addEventListener("click",function(){
-    pendingDeleteId=null; $("confirm").classList.remove("show");
-  });
+  $("confirmNo").addEventListener("click",function(){ $("confirm").classList.remove("show"); });
   $("confirmYes").addEventListener("click",function(){
     if(confirmMode==="clear"){
       entries.length=0; persist();
       renderHistory(); renderDashboard(false); vibe(10);
-    } else if(pendingDeleteId!=null){
-      for(var i=0;i<entries.length;i++){
-        if(entries[i].id===pendingDeleteId){ entries.splice(i,1); break; }
-      }
-      persist();
-      renderHistory(); renderDashboard(false); vibe(10);
     }
-    pendingDeleteId=null; confirmMode="delete";
+    confirmMode="delete";
     $("confirm").classList.remove("show");
   });
   $("confirm").addEventListener("click",function(ev){
-    if(ev.target===$("confirm")){ pendingDeleteId=null; $("confirm").classList.remove("show"); }
+    if(ev.target===$("confirm")){ $("confirm").classList.remove("show"); }
   });
 
   // ---------- init ----------
