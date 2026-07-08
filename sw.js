@@ -1,8 +1,9 @@
-const CACHE = "rk-v1";
+const CACHE = "rk-v2";
 const ASSETS = [
   "./",
   "./index.html",
   "./manifest.json",
+  "./fonts/Pretendard-sub.woff2",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
   "./icons/apple-touch-icon.png"
