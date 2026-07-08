@@ -718,8 +718,9 @@
       return;
     }
 
-    // 라인 점: 첫 거래~마지막 거래. 진행 중 기간이면 오늘까지 평평히 연장(미래 구간엔 선 없음).
-    var linePts=pts.slice();
+    // 라인 점: (윈도우 시작, 0) 앵커 → 첫 거래~마지막 거래 → (진행 중이면 오늘까지 평평 연장; 미래엔 선 없음).
+    // 꺾은선 유지(계단 아님). 앵커는 합성점이라 스크럽 스냅 대상(scrubPts)에서 제외.
+    var linePts=[{t:axisStart, c:0}].concat(pts);
     var lastT=pts[pts.length-1].t;
     if(isCur && TODAY.getTime()>lastT){ linePts.push({t:TODAY.getTime(), c:total}); }
 
